@@ -284,7 +284,37 @@ class daily_employee_digest extends \core\task\scheduled_task {
                 }
             }
         }
-        $sent = email_to_user($recipient, \core_user::get_noreply_user(), $subject, $plain, $html, $attachmentpath, $attachmentname);
+        // Added 16 November 2026: optionally CC one administrator-configured
+        // address on every scheduled email. The employee remains the To recipient.
+        $ccaddress = '';
+        if (get_config('local_birthdayflyer', 'enable_email_cc')) {
+            $configuredcc = trim((string)get_config('local_birthdayflyer', 'email_cc_address'));
+            // Never let a malformed optional CC address prevent delivery to the employee.
+            if ($configuredcc !== '' && validate_email($configuredcc)) {
+                $ccaddress = $configuredcc;
+            } else if ($configuredcc !== '') {
+                debugging('Birthday Flyer: configured CC email address is invalid; sending without CC.', DEBUG_DEVELOPER);
+            }
+        }
+
+        // Moodle's email_to_user() does not have CC/BCC parameters. Its supported
+        // extension point is the sender object's customheaders property. Clone the
+        // no-reply user so the CC header applies only to this email, not other mail.
+        $from = clone \core_user::get_noreply_user();
+        if ($ccaddress !== '') {
+            $from->customheaders = ['Cc: ' . $ccaddress];
+        }
+
+        // Keep the standard Moodle email_to_user() arguments unchanged.
+        $sent = email_to_user(
+            $recipient,
+            $from,
+            $subject,
+            $plain,
+            $html,
+            $attachmentpath,
+            $attachmentname
+        );
         if ($tempfile && is_file($tempfile)) { @unlink($tempfile); }
         return (bool)$sent;
     }

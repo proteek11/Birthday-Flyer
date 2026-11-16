@@ -280,3 +280,10 @@ $string['openplugin'] = 'Open Birthday Flyer';
 
 $string['employeesearchplaceholder'] = 'Search employees by ID, name, email, or any date...';
 $string['clearsearch'] = 'Clear search';
+// Added 16 November 2026: optional global CC settings for scheduled emails.
+$string['ccsettingsheading'] = 'Email CC settings';
+$string['ccsettingsintro'] = 'Optionally send a copy of every Birthday Flyer email to one additional email address. The employee remains the primary recipient.';
+$string['enableemailcc'] = 'Enable CC';
+$string['enableemailcc_desc'] = 'When enabled, the configured CC address receives a copy of each email sent by the daily scheduled task.';
+$string['emailccaddress'] = 'CC email address';
+$string['emailccaddress_desc'] = 'Enter one valid email address to receive copies of Thought of the Day, birthday, work anniversary, and marriage anniversary emails.';

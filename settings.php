@@ -67,4 +67,28 @@ if ($hassiteconfig) {
         get_string('settingmarriageanniversary_desc', 'local_birthdayflyer'),
         1
     ));
+
+    // Added 16 November 2026: configure an optional global CC recipient for all
+    // Birthday Flyer scheduled emails. CC is disabled by default to preserve
+    // the existing delivery behaviour until an administrator enables it.
+    $settings->add(new admin_setting_heading(
+        'local_birthdayflyer/ccsettingsheading',
+        get_string('ccsettingsheading', 'local_birthdayflyer'),
+        get_string('ccsettingsintro', 'local_birthdayflyer')
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_birthdayflyer/enable_email_cc',
+        get_string('enableemailcc', 'local_birthdayflyer'),
+        get_string('enableemailcc_desc', 'local_birthdayflyer'),
+        0
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_birthdayflyer/email_cc_address',
+        get_string('emailccaddress', 'local_birthdayflyer'),
+        get_string('emailccaddress_desc', 'local_birthdayflyer'),
+        '',
+        PARAM_EMAIL
+    ));
 }
