@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/birthdayflyer/db" VERSION="20261026" COMMENT="XMLDB file for local_birthdayflyer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+  <TABLES>
+    <TABLE NAME="local_birthdayflyer" COMMENT="Employee profile details">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="empid" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="empfullname" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="empemail" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="date_of_birth" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="date_of_birth_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="date_of_joining" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="date_of_joining_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="marriage_date" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="marriage_date_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="father_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="father_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="mother_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="mother_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="wife_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="wife_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="son_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="son_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="daughter_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="daughter_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="usermodified_fk" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="empid_uix" UNIQUE="true" FIELDS="empid"/>
+        <INDEX NAME="empemail_ix" UNIQUE="false" FIELDS="empemail"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_birthdayflyer_thought" COMMENT="Thought of the day by date">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="thoughtdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="thought" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="imagekey" TYPE="char" LENGTH="64" NOTNULL="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="usermodified_fk" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="thoughtdate_uix" UNIQUE="true" FIELDS="thoughtdate"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_birthdayflyer_template" COMMENT="HTML birthday email templates">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="eventtype" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="birthday"/>
+        <FIELD NAME="body" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="bodyformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="imagekey" TYPE="char" LENGTH="64" NOTNULL="true"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="usermodified_fk" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="active_ix" UNIQUE="false" FIELDS="active"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_birthdayflyer_sent" COMMENT="Daily email delivery log">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="employeeid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="senddate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="employee_fk" TYPE="foreign" FIELDS="employeeid" REFTABLE="local_birthdayflyer" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="employee_senddate_uix" UNIQUE="true" FIELDS="employeeid, senddate"/>
+      </INDEXES>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>

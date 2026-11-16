@@ -1,0 +1,295 @@
+<?php
+// This file is part of Moodle - https://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+require('../../config.php');
+require_login();
+$context = context_system::instance();
+require_capability('local/birthdayflyer:manage', $context);
+require_once($CFG->libdir . '/filelib.php');
+use local_birthdayflyer\form\thought_import_form;
+use local_birthdayflyer\form\thought_form;
+use local_birthdayflyer\form\thought_image_form;
+$editthoughtid = optional_param('editthought', 0, PARAM_INT);
+$deletethoughtid = optional_param('deletethought', 0, PARAM_INT);
+$confirmthoughtdelete = optional_param('confirmdelete', 0, PARAM_BOOL);
+$PAGE->set_url(new moodle_url('/local/birthdayflyer/import.php', $editthoughtid ? ['editthought' => $editthoughtid] : []));
+$PAGE->set_context($context);
+$PAGE->set_pagelayout('standard');
+$PAGE->set_title(get_string('importthoughts', 'local_birthdayflyer'));
+$PAGE->set_heading(get_string('importthoughts', 'local_birthdayflyer'));
+$PAGE->requires->css(new moodle_url('/local/birthdayflyer/styles.css'));
+// Add the dashboard as the parent breadcrumb for this tool page.
+$PAGE->navbar->add(get_string('employees', 'local_birthdayflyer'), new moodle_url('/local/birthdayflyer/index.php'));
+$PAGE->navbar->add(get_string('importthoughts', 'local_birthdayflyer'));
+// Keep all Thought of the Day create, edit, delete, import, and listing functions on this tab.
+if ($deletethoughtid) {
+    $thoughtrecord = $DB->get_record('local_birthdayflyer_thought', ['id' => $deletethoughtid], '*', MUST_EXIST);
+    if ($confirmthoughtdelete) {
+        require_sesskey();
+        get_file_storage()->delete_area_files($context->id, 'local_birthdayflyer', 'thoughtimage', $deletethoughtid);
+        $DB->delete_records('local_birthdayflyer_thought', ['id' => $deletethoughtid]);
+        redirect(new moodle_url('/local/birthdayflyer/import.php'), get_string('thoughtdeleted', 'local_birthdayflyer'), null, \core\output\notification::NOTIFY_SUCCESS);
+    }
+    echo $OUTPUT->header();
+    echo $OUTPUT->confirm(get_string('confirmdeletethought', 'local_birthdayflyer'),
+        new moodle_url('/local/birthdayflyer/import.php', ['deletethought' => $deletethoughtid, 'confirmdelete' => 1, 'sesskey' => sesskey()]),
+        new moodle_url('/local/birthdayflyer/import.php'));
+    echo $OUTPUT->footer();
+    exit;
+}
+$imageform = new thought_image_form();
+$sharedimagekey = (string)get_config('local_birthdayflyer', 'thoughtimagekey');
+if ($imageform->is_cancelled()) {
+    redirect(new moodle_url('/local/birthdayflyer/import.php'));
+} else if ($imagedata = $imageform->get_data()) {
+    $draftitemid = (int)($imagedata->imagefile ?? 0);
+    if (!$draftitemid) {
+        \core\notification::error(get_string('thoughtsharedimagenotfound', 'local_birthdayflyer'));
+    } else {
+        // Rotate the key whenever the artwork is replaced so the new image
+        // cannot be served from a browser/mail-client cache using the old URL.
+        $sharedimagekey = bin2hex(random_bytes(24));
+        set_config('thoughtimagekey', $sharedimagekey, 'local_birthdayflyer');
+        $fs = get_file_storage();
+        $fs->delete_area_files($context->id, 'local_birthdayflyer', 'thoughtimage', 0);
+        file_save_draft_area_files(
+            $draftitemid,
+            $context->id,
+            'local_birthdayflyer',
+            'thoughtimage',
+            0,
+            ['subdirs' => 0, 'maxfiles' => 1, 'maxbytes' => 20 * 1024 * 1024]
+        );
+        redirect(new moodle_url('/local/birthdayflyer/import.php'), get_string('thoughtsharedimagesaved', 'local_birthdayflyer'), null, \core\output\notification::NOTIFY_SUCCESS);
+    }
+}
+
+$thoughtform = new thought_form(null, ['id' => $editthoughtid]);
+if ($editthoughtid) {
+    $existingthought = $DB->get_record('local_birthdayflyer_thought', ['id' => $editthoughtid], '*', MUST_EXIST);
+    $thoughtform->set_data((object)[
+        'id' => $existingthought->id,
+        'thoughtdate' => $existingthought->thoughtdate,
+        'thought' => trim(strip_tags((string)$existingthought->thought)),
+    ]);
+}
+
+if ($thoughtdata = $thoughtform->get_data()) {
+    $servertimezone = \core_date::get_server_timezone();
+    $dateparts = usergetdate((int)$thoughtdata->thoughtdate);
+    $thoughtdate = make_timestamp((int)$dateparts['year'], (int)$dateparts['mon'], (int)$dateparts['mday'], 0, 0, 0, $servertimezone);
+    $existing = $editthoughtid ? $DB->get_record('local_birthdayflyer_thought', ['id' => $editthoughtid], '*', MUST_EXIST) : $DB->get_record('local_birthdayflyer_thought', ['thoughtdate' => $thoughtdate]);
+    $save = (object)[
+        'thoughtdate' => $thoughtdate,
+        // Thought records now store only the quote text. The email HTML and
+        // shared image are generated by the scheduled task.
+        'thought' => trim(strip_tags((string)$thoughtdata->thought)),
+        'timemodified' => time(),
+        'usermodified' => $USER->id,
+    ];
+    if ($existing) {
+        $save->id = $existing->id;
+        $DB->update_record('local_birthdayflyer_thought', $save);
+        $thoughtid = $existing->id;
+    } else {
+        $save->timecreated = time();
+        $thoughtid = $DB->insert_record('local_birthdayflyer_thought', $save);
+    }
+
+    redirect(new moodle_url('/local/birthdayflyer/import.php'), get_string('thoughtsaved', 'local_birthdayflyer'), null, \core\output\notification::NOTIFY_SUCCESS);
+}
+$form = new thought_import_form();
+if ($form->is_cancelled()) {
+    redirect(new moodle_url('/local/birthdayflyer/index.php'));
+} else if ($data = $form->get_data()) {
+    $fs = get_file_storage();
+    $draftid = (int)$data->workbook;
+    $files = $fs->get_area_files(context_user::instance($USER->id)->id, 'user', 'draft', $draftid, 'id ASC', false);
+    if (!$files) {
+        \core\notification::error(get_string('importnofile', 'local_birthdayflyer'));
+    } else {
+        $file = reset($files);
+        $filename = $file->get_filename();
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $tempfile = tempnam($CFG->tempdir, 'employeemgmt');
+        $file->copy_content_to($tempfile);
+        $rows = [];
+        try {
+            if ($extension === 'csv') {
+                $handle = fopen($tempfile, 'rb');
+                while (($row = fgetcsv($handle)) !== false) { $rows[] = $row; }
+                fclose($handle);
+            } else {
+                if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
+                    throw new \RuntimeException(get_string('phpspreadsheetmissing', 'local_birthdayflyer'));
+                }
+                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tempfile);
+                $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, false);
+                $spreadsheet->disconnectWorksheets();
+                unset($spreadsheet);
+            }
+            if (count($rows) < 2) {
+                throw new \RuntimeException(get_string('importempty', 'local_birthdayflyer'));
+            }
+            $header = array_map(static function($value) { return strtolower(trim((string)$value)); }, array_shift($rows));
+            $dateindex = null; $thoughtindex = null;
+            foreach ($header as $index => $label) {
+                if (in_array($label, ['date', 'thought date', 'thoughtdate'], true)) { $dateindex = $index; }
+                if (in_array($label, ['thought of the day', 'thought', 'thoughtoftheday'], true)) { $thoughtindex = $index; }
+            }
+            if ($dateindex === null || $thoughtindex === null) {
+                throw new \RuntimeException(get_string('importbadheaders', 'local_birthdayflyer'));
+            }
+            $servertimezone = \core_date::get_server_timezone();
+            $imported = 0; $updated = 0; $skipped = 0;
+            foreach ($rows as $row) {
+                $rawdate = $row[$dateindex] ?? null;
+                $thoughttext = trim(strip_tags((string)($row[$thoughtindex] ?? '')));
+                if (($rawdate === null || $rawdate === '') || $thoughttext === '') { $skipped++; continue; }
+                if (is_numeric($rawdate) && $extension !== 'csv' && class_exists('\\PhpOffice\\PhpSpreadsheet\\Shared\\Date')) {
+                    $timestamp = (int)\PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp((float)$rawdate);
+                    $parts = usergetdate($timestamp, $servertimezone);
+                } else {
+                    $parsed = strtotime(trim((string)$rawdate));
+                    if ($parsed === false) { $skipped++; continue; }
+                    $parts = usergetdate($parsed, $servertimezone);
+                }
+                $key = make_timestamp((int)$parts['year'], (int)$parts['mon'], (int)$parts['mday'], 0, 0, 0, $servertimezone);
+                $existing = $DB->get_record('local_birthdayflyer_thought', ['thoughtdate' => $key]);
+                if ($existing) {
+                    if (empty($data->updateexisting)) { $skipped++; continue; }
+                    $existing->thought = $thoughttext;
+                    $existing->timemodified = time();
+                    $existing->usermodified = $USER->id;
+                    $DB->update_record('local_birthdayflyer_thought', $existing);
+                    $updated++;
+                } else {
+                    $DB->insert_record('local_birthdayflyer_thought', (object)[
+                        'thoughtdate' => $key, 'thought' => $thoughttext, 'timecreated' => time(),
+                        'timemodified' => time(), 'usermodified' => $USER->id,
+                    ]);
+                    $imported++;
+                }
+            }
+            \core\notification::success(get_string('importsummary', 'local_birthdayflyer', ['imported' => $imported, 'updated' => $updated, 'skipped' => $skipped]));
+        } catch (\Throwable $e) {
+            \core\notification::error(get_string('importfailed', 'local_birthdayflyer', $e->getMessage()));
+        } finally {
+            @unlink($tempfile);
+        }
+    }
+}
+echo $OUTPUT->header();
+echo html_writer::start_div('employeemgmt-dashboard employeemgmt-subpage');
+// Keep sibling tools visible so administrators can move between the plugin's main workflows.
+echo html_writer::div(
+    html_writer::link(new moodle_url('/local/birthdayflyer/index.php'), get_string('employees', 'local_birthdayflyer'), ['class' => 'employeemgmt-nav-link']) .
+    html_writer::link(new moodle_url('/local/birthdayflyer/import.php'), get_string('importthoughts', 'local_birthdayflyer'), ['class' => 'employeemgmt-nav-link is-active']) .
+    html_writer::link(new moodle_url('/local/birthdayflyer/templates.php'), get_string('managetemplates', 'local_birthdayflyer'), ['class' => 'employeemgmt-nav-link']) .
+    html_writer::link(new moodle_url('/local/birthdayflyer/reports.php'), get_string('reports', 'local_birthdayflyer'), ['class' => 'employeemgmt-nav-link']),
+    'employeemgmt-navigation', ['aria-label' => get_string('pluginareanavigation', 'local_birthdayflyer')]);
+echo html_writer::start_div('employeemgmt-hero employeemgmt-subpage-hero');
+echo html_writer::start_div('employeemgmt-hero-copy');
+echo html_writer::tag('div', get_string('pluginname', 'local_birthdayflyer'), ['class' => 'employeemgmt-eyebrow']);
+echo html_writer::tag('h2', get_string('importthoughts', 'local_birthdayflyer'), ['class' => 'employeemgmt-title']);
+echo html_writer::tag('p', get_string('importpageintro', 'local_birthdayflyer'), ['class' => 'employeemgmt-subtitle']);
+echo html_writer::end_div();
+
+echo html_writer::end_div();
+// A single shared image is used for every Thought of the Day email.
+echo html_writer::start_div('employeemgmt-panel employeemgmt-form-panel employeemgmt-thought-image-panel');
+echo html_writer::start_div('employeemgmt-panel-heading');
+echo html_writer::tag('div', html_writer::tag('h3', get_string('thoughtsharedimagetitle', 'local_birthdayflyer')) . html_writer::tag('p', get_string('thoughtsharedimageintro', 'local_birthdayflyer')), ['class' => 'employeemgmt-heading-copy']);
+echo html_writer::end_div();
+
+$sharedfiles = get_file_storage()->get_area_files($context->id, 'local_birthdayflyer', 'thoughtimage', 0, 'id ASC', false);
+$hassharedimage = false;
+$sharedfilename = '';
+if ($sharedfiles && $sharedimagekey !== '') {
+    $sharedfile = reset($sharedfiles);
+    if (in_array($sharedfile->get_mimetype(), ['image/png', 'image/jpeg', 'image/gif', 'image/webp'], true)) {
+        $hassharedimage = true;
+        $sharedfilename = $sharedfile->get_filename();
+    }
+}
+if ($hassharedimage) {
+    $previewurl = new moodle_url('/local/birthdayflyer/thought_image.php', [
+        'id' => 0,
+        'key' => $sharedimagekey,
+        'v' => (int)$sharedfile->get_id(),
+    ]);
+    echo html_writer::start_div('employeemgmt-thought-current-image');
+    echo html_writer::tag('div', get_string('thoughtcurrentimage', 'local_birthdayflyer'), ['class' => 'employeemgmt-thought-current-image-title']);
+    echo html_writer::tag('img', '', [
+        'src' => $previewurl->out(false),
+        'alt' => get_string('thoughtimagealt', 'local_birthdayflyer'),
+        'class' => 'employeemgmt-thought-current-image-preview',
+    ]);
+    echo html_writer::tag('div', get_string('thoughtcurrentimagehint', 'local_birthdayflyer'), ['class' => 'employeemgmt-thought-current-image-hint']);
+    echo html_writer::end_div();
+}
+echo html_writer::start_div('employeemgmt-thought-image-status-card' . ($hassharedimage ? ' is-active' : ''));
+echo html_writer::tag('div', html_writer::tag('span', '✦', ['class' => 'employeemgmt-thought-image-icon', 'aria-hidden' => 'true']), ['class' => 'employeemgmt-thought-image-icon-wrap']);
+echo html_writer::start_div('employeemgmt-thought-image-status-copy');
+echo html_writer::tag('strong', $hassharedimage ? get_string('thoughtimageactive', 'local_birthdayflyer') : get_string('thoughtimagenotconfigured', 'local_birthdayflyer'));
+echo html_writer::tag('span', $hassharedimage ? get_string('thoughtimageactiveintro', 'local_birthdayflyer', $sharedfilename) : get_string('thoughtimagenotconfiguredintro', 'local_birthdayflyer'));
+echo html_writer::end_div();
+echo html_writer::tag('span', $hassharedimage ? get_string('thoughtimageactivebadge', 'local_birthdayflyer') : get_string('thoughtimageaddbadge', 'local_birthdayflyer'), ['class' => 'employeemgmt-thought-image-badge']);
+echo html_writer::end_div();
+$imageform->display();
+echo html_writer::end_div();
+
+echo html_writer::start_div('employeemgmt-panel employeemgmt-form-panel');
+echo html_writer::start_div('employeemgmt-panel-heading');
+echo html_writer::tag('div',
+    html_writer::tag('h3', get_string('importthoughts', 'local_birthdayflyer')) .
+    html_writer::tag('p', get_string('importformintro', 'local_birthdayflyer')) .
+    html_writer::link(
+        new moodle_url('/local/birthdayflyer/sample_thought_import.csv'),
+        get_string('downloadthoughtcsvsample', 'local_birthdayflyer'),
+        ['class' => 'employeemgmt-csv-sample-link']
+    ),
+    ['class' => 'employeemgmt-heading-copy']
+);
+echo html_writer::end_div();
+$form->display();
+echo html_writer::end_div();
+// Separate panel for individual thought editing and the full scheduled-thought table.
+echo html_writer::start_div('employeemgmt-panel employeemgmt-form-panel');
+echo html_writer::tag('h3', $editthoughtid ? get_string('editthought', 'local_birthdayflyer') : get_string('thoughtformtitle', 'local_birthdayflyer'));
+$thoughtform->display();
+echo html_writer::end_div();
+$allthoughts = $DB->get_records('local_birthdayflyer_thought', null, 'thoughtdate ASC');
+echo html_writer::start_div('employeemgmt-panel employeemgmt-list-panel');
+echo html_writer::tag('h3', get_string('upcomingthoughts', 'local_birthdayflyer'));
+if (!$allthoughts) {
+    echo $OUTPUT->notification(get_string('noupcomingthoughts', 'local_birthdayflyer'), 'info');
+} else {
+    $thoughttable = new html_table();
+    $thoughttable->attributes['class'] = 'generaltable employeemgmt-table';
+    $thoughttable->head = [get_string('thoughtdatecolumn', 'local_birthdayflyer'), get_string('thoughttextcolumn', 'local_birthdayflyer'), get_string('actions')];
+    foreach ($allthoughts as $item) {
+        $actions = html_writer::div(
+            html_writer::link(
+                new moodle_url('/local/birthdayflyer/import.php', ['editthought' => $item->id]),
+                get_string('edit'),
+                ['class' => 'btn btn-sm btn-outline-primary employeemgmt-thought-action']
+            ) .
+            html_writer::link(
+                new moodle_url('/local/birthdayflyer/import.php', ['deletethought' => $item->id, 'sesskey' => sesskey()]),
+                get_string('delete'),
+                ['class' => 'btn btn-sm btn-outline-danger employeemgmt-thought-action']
+            ),
+            'employeemgmt-thought-actions'
+        );
+        $thoughttable->data[] = [userdate((int)$item->thoughtdate, get_string('strftimedate')), s($item->thought), $actions];
+    }
+    echo html_writer::table($thoughttable);
+}
+echo html_writer::end_div();
+echo html_writer::end_div();
+echo $OUTPUT->footer();

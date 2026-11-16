@@ -1,0 +1,3 @@
+empid,empfullname,empemail,date_of_birth,date_of_joining,marriage_date,father_dob,mother_dob,wife_dob,son_dob,daughter_dob
+100001,Poonam Kulkarni,poonam@example.com,15-10-1990,01-06-2020,20-02-2018,10-01-1960,12-03-1962,20-02-1992,05-05-2015,11-11-2018
+100002,Rahul Sharma,rahul@example.com,22-07-1988,15-09-2019,,,,,,

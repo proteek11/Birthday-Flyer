@@ -1,0 +1,419 @@
+/* Theme-aware Birthday Flyer dashboard. */
+body.path-local-birthdayflyer #page.drawers .main-inner,
+body.path-local-birthdayflyer #page .main-inner {
+    max-width: none;
+    width: 100%;
+}
+body.path-local-birthdayflyer #page.drawers .main-inner {
+    padding-left: clamp(1rem, 2vw, 2rem);
+    padding-right: clamp(1rem, 2vw, 2rem);
+}
+.employeemgmt-dashboard {
+    --em-radius: var(--bs-border-radius-xl, 1rem);
+    --em-border: var(--bs-border-color, currentColor);
+    --em-muted: var(--bs-secondary-color, inherit);
+    width: 100%;
+    max-width: none;
+    margin: 0 auto 2rem;
+    color: var(--bs-body-color, inherit);
+}
+.employeemgmt-dashboard .employeemgmt-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    margin: .5rem 0 1.25rem;
+    border-radius: var(--em-radius);
+    overflow: hidden;
+    color: var(--bs-primary-text-emphasis, var(--bs-body-color, inherit));
+    background: var(--bs-primary-bg-subtle, var(--bs-tertiary-bg, transparent));
+    border: 1px solid var(--bs-border-color, currentColor);
+}
+.employeemgmt-eyebrow {
+    margin-bottom: .45rem;
+    color: var(--bs-primary, inherit);
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+.employeemgmt-title {
+    margin: 0 0 .5rem;
+    color: inherit;
+    font-size: clamp(1.7rem, 3vw, 2.25rem);
+    font-weight: 750;
+    letter-spacing: -.03em;
+}
+.employeemgmt-subtitle {
+    max-width: 720px;
+    margin: 0;
+    color: var(--em-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+.employeemgmt-hero-mark {
+    display: grid;
+    flex: 0 0 76px;
+    width: 76px;
+    height: 76px;
+    place-items: center;
+    border: 1px solid var(--bs-border-color, currentColor);
+    border-radius: var(--em-radius);
+    background: var(--bs-body-bg, transparent);
+    color: var(--bs-primary, inherit);
+}
+.employeemgmt-mark {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+.employeemgmt-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.employeemgmt-stat-card {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: .9rem;
+    align-items: center;
+    padding: 1.15rem 1.25rem;
+    border: 1px solid var(--em-border);
+    border-radius: var(--em-radius);
+    background: var(--bs-body-bg, transparent);
+}
+.employeemgmt-stat-icon {
+    grid-row: 1 / span 2;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: .75rem;
+    background: var(--bs-primary-bg-subtle, var(--bs-tertiary-bg, transparent));
+    color: var(--bs-primary, inherit);
+    font-size: 1.1rem;
+}
+.employeemgmt-stat-value { font-size: 1.3rem; font-weight: 750; line-height: 1.3; overflow-wrap: anywhere; }
+.employeemgmt-stat-label { margin-top: .2rem; color: var(--em-muted); font-size: .85rem; }
+.employeemgmt-panel {
+    width: 100%;
+    margin-bottom: 1.25rem;
+    border: 1px solid var(--em-border);
+    border-radius: var(--em-radius);
+    background: var(--bs-body-bg, transparent);
+    overflow: hidden;
+}
+.employeemgmt-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--em-border);
+}
+.employeemgmt-heading-copy h3 { margin: 0 0 .3rem; font-size: 1.15rem; font-weight: 750; }
+.employeemgmt-heading-copy p { margin: 0; color: var(--em-muted); font-size: .9rem; }
+.employeemgmt-panel .mform { padding: 1.5rem; }
+.employeemgmt-panel .mform fieldset { margin: 0 0 1.25rem; padding: 0; border: 0; }
+.employeemgmt-panel .mform fieldset > legend {
+    margin-bottom: 1rem; padding-bottom: .65rem; border-bottom: 1px solid var(--em-border);
+    color: var(--bs-primary, inherit); font-size: .95rem; font-weight: 750;
+}
+.employeemgmt-panel .mform .form-group { margin-bottom: 1rem; }
+.employeemgmt-panel .mform label { font-weight: 650; }
+.employeemgmt-panel .mform input.form-control,
+.employeemgmt-panel .mform select.form-control,
+.employeemgmt-panel .mform textarea.form-control,
+.employeemgmt-panel .mform select,
+.employeemgmt-panel .mform input[type="text"],
+.employeemgmt-panel .mform textarea { border-radius: var(--bs-border-radius, .375rem); }
+.employeemgmt-panel .mform .fdescription,
+.employeemgmt-panel .mform .form-control-feedback { font-size: .85rem; }
+.employeemgmt-panel .mform .fitem_actionbuttons { padding-top: .75rem; border-top: 1px solid var(--em-border); }
+.employeemgmt-panel .mform input[type="submit"] { min-width: 150px; font-weight: 700; }
+.employeemgmt-cancel { white-space: nowrap; }
+.employeemgmt-record-count {
+    display: inline-flex; align-items: center; padding: .35rem .7rem; border-radius: 999px;
+    background: var(--bs-tertiary-bg, transparent); color: var(--em-muted); font-size: .8rem; font-weight: 700; white-space: nowrap;
+}
+.employeemgmt-table-wrap { width: 100%; overflow-x: auto; }
+.employeemgmt-table { width: 100%; min-width: 820px; margin: 0; }
+.employeemgmt-table thead th {
+    padding: .9rem 1rem; border-top: 0; background: var(--bs-tertiary-bg, transparent);
+    color: var(--em-muted); font-size: .75rem; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap;
+}
+.employeemgmt-table tbody td { padding: 1rem; vertical-align: middle; }
+.employeemgmt-table tbody tr:last-child td { border-bottom: 0; }
+.employeemgmt-identity { display: flex; align-items: center; gap: .7rem; min-width: 140px; }
+.employeemgmt-avatar {
+    display: inline-grid; flex: 0 0 38px; width: 38px; height: 38px; place-items: center;
+    border-radius: .75rem; background: var(--bs-primary-bg-subtle, var(--bs-tertiary-bg, transparent));
+    color: var(--bs-primary, inherit); font-weight: 800;
+}
+.employeemgmt-employee-name { display: block; font-weight: 750; }
+.employeemgmt-muted { color: var(--em-muted); font-size: .78rem; }
+.employeemgmt-email { overflow-wrap: anywhere; }
+.employeemgmt-edit-button { white-space: nowrap; }
+.employeemgmt-empty-state { padding: 3rem 1.5rem; text-align: center; }
+.employeemgmt-empty-icon {
+    display: grid; width: 58px; height: 58px; margin: 0 auto 1rem; place-items: center;
+    border-radius: 1rem; background: var(--bs-primary-bg-subtle, var(--bs-tertiary-bg, transparent));
+    color: var(--bs-primary, inherit); font-size: 2rem;
+}
+.employeemgmt-empty-state h4 { margin-bottom: .4rem; font-weight: 750; }
+.employeemgmt-empty-state p { margin: 0; color: var(--em-muted); }
+.employeemgmt-thought-card {
+    margin: 0 0 1.25rem; padding: 1.25rem 1.5rem; border: 1px solid var(--em-border);
+    border-left: .3rem solid var(--bs-primary, currentColor); border-radius: var(--em-radius);
+    background: var(--bs-primary-bg-subtle, var(--bs-body-bg, transparent));
+}
+.employeemgmt-thought-card h3 { margin: 0 0 .5rem; font-size: 1rem; font-weight: 750; }
+.employeemgmt-thought-card blockquote { margin: 0; font-size: 1.05rem; line-height: 1.65; }
+@media (max-width: 767.98px) {
+    .employeemgmt-dashboard .employeemgmt-hero { padding: 1.25rem; }
+    .employeemgmt-hero-mark { display: none; }
+    .employeemgmt-stats { grid-template-columns: 1fr; gap: .75rem; }
+    .employeemgmt-panel-heading { align-items: flex-start; padding: 1rem; }
+    .employeemgmt-panel .mform { padding: 1rem; }
+    .employeemgmt-record-count { font-size: .72rem; }
+}
+
+.employeemgmt-quicklinks { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
+.employeemgmt-quicklinks .btn { margin: 0; }
+
+
+/* Consistent navigation and subpage layout shared by all plugin screens. */
+.employeemgmt-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin: .25rem 0 1rem;
+    padding: .35rem;
+    border: 1px solid var(--em-border, var(--bs-border-color, currentColor));
+    border-radius: var(--em-radius, 1rem);
+    background: var(--bs-body-bg, transparent);
+}
+.employeemgmt-nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: .55rem .9rem;
+    border-radius: var(--bs-border-radius, .375rem);
+    color: var(--bs-body-color, inherit);
+    font-weight: 650;
+    text-decoration: none;
+}
+.employeemgmt-nav-link:hover,
+.employeemgmt-nav-link:focus {
+    background: var(--bs-tertiary-bg, transparent);
+    color: var(--bs-primary, inherit);
+    text-decoration: none;
+}
+.employeemgmt-nav-link.is-active {
+    background: var(--bs-primary-bg-subtle, var(--bs-tertiary-bg, transparent));
+    color: var(--bs-primary, inherit);
+}
+.employeemgmt-subpage-hero { align-items: center; }
+.employeemgmt-subpage-action { flex: 0 0 auto; }
+.employeemgmt-upcoming-panel .employeemgmt-table { min-width: 0; }
+.employeemgmt-thought-table tbody td:first-child { width: 180px; white-space: nowrap; }
+.employeemgmt-date-pill {
+    display: inline-flex;
+    padding: .4rem .65rem;
+    border: 1px solid var(--em-border, var(--bs-border-color, currentColor));
+    border-radius: 999px;
+    background: var(--bs-tertiary-bg, transparent);
+    font-size: .85rem;
+    font-weight: 700;
+}
+.employeemgmt-thought-preview { white-space: pre-line; line-height: 1.55; overflow-wrap: anywhere; }
+.employeemgmt-subpage .employeemgmt-panel { margin-top: 1rem; }
+.employeemgmt-subpage .employeemgmt-panel-heading { background: var(--bs-tertiary-bg, transparent); }
+@media (max-width: 767.98px) {
+    .employeemgmt-subpage-hero { align-items: flex-start; flex-direction: column; }
+    .employeemgmt-subpage-action { width: 100%; }
+    .employeemgmt-subpage-action .btn { width: 100%; }
+    .employeemgmt-thought-table tbody td:first-child { width: auto; white-space: normal; }
+}
+
+
+/* Keep scheduled-thought action buttons consistently aligned. */
+.employeemgmt-thought-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: .4rem;
+    width: 72px;
+    margin: 0 auto;
+}
+.employeemgmt-thought-actions .employeemgmt-thought-action {
+    display: block;
+    width: 100%;
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+}
+.employeemgmt-thought-table tbody td:last-child,
+.employeemgmt-table tbody td:last-child {
+    vertical-align: middle;
+    text-align: center;
+}
+
+
+/* Shared Thought of the Day artwork uploader */
+.employeemgmt-thought-image-status-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 1rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid #dce6f4;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f7fbff 0%, #eef5ff 100%);
+    box-shadow: 0 8px 24px rgba(18, 59, 120, .07);
+}
+.employeemgmt-thought-image-status-card.is-active {
+    border-color: #c8ddf8;
+    background: linear-gradient(135deg, #f7fbff 0%, #edf7f3 100%);
+}
+.employeemgmt-thought-image-icon-wrap {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #123b78, #2f78c8);
+    box-shadow: 0 7px 18px rgba(18, 59, 120, .18);
+}
+.employeemgmt-thought-image-icon {
+    color: #fff;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+.employeemgmt-thought-image-status-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    flex: 1 1 auto;
+}
+.employeemgmt-thought-image-status-copy strong {
+    color: #123b78;
+    font-size: .98rem;
+}
+.employeemgmt-thought-image-status-copy span {
+    color: #607087;
+    font-size: .88rem;
+    line-height: 1.45;
+}
+.employeemgmt-thought-image-badge {
+    flex: 0 0 auto;
+    padding: .42rem .68rem;
+    border-radius: 999px;
+    background: #e3efff;
+    color: #174a8b;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    white-space: nowrap;
+}
+.employeemgmt-thought-image-status-card.is-active .employeemgmt-thought-image-badge {
+    background: #dff4ea;
+    color: #18704b;
+}
+.employeemgmt-thought-image-panel .mform {
+    padding-top: 0;
+}
+.employeemgmt-thought-image-panel .filepicker-filelist {
+    border-radius: 12px;
+}
+@media (max-width: 700px) {
+    .employeemgmt-thought-image-status-card {
+        align-items: flex-start;
+    }
+    .employeemgmt-thought-image-badge {
+        display: none;
+    }
+}
+
+.employeemgmt-csv-sample-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    margin-top: .6rem;
+    font-size: .85rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+.employeemgmt-report-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.employeemgmt-report-card {
+    padding: 1.15rem 1.25rem;
+    border: 1px solid var(--em-border);
+    border-radius: var(--em-radius);
+    background: var(--bs-body-bg, transparent);
+}
+.employeemgmt-report-card-value { font-size: 1.7rem; font-weight: 800; line-height: 1.2; }
+.employeemgmt-report-card-label { margin-top: .3rem; color: var(--em-muted); font-size: .82rem; }
+.employeemgmt-report-table .report-event { font-weight: 700; }
+.employeemgmt-report-table .report-muted { color: var(--em-muted); font-size: .82rem; }
+@media (max-width: 1000px) { .employeemgmt-report-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .employeemgmt-report-grid { grid-template-columns: 1fr; } }
+
+.employeemgmt-thought-current-image {
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border: 1px solid #dce6f4;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #fbfdff 0%, #f3f7fc 100%);
+    text-align: center;
+}
+.employeemgmt-thought-current-image-title {
+    margin-bottom: .75rem;
+    color: #123b78;
+    font-size: .86rem;
+    font-weight: 800;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+.employeemgmt-thought-current-image-preview {
+    display: block;
+    width: 100%;
+    max-width: 620px;
+    max-height: 320px;
+    margin: 0 auto;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 10px 26px rgba(18, 59, 120, .12);
+}
+.employeemgmt-thought-current-image-hint {
+    margin-top: .7rem;
+    color: #607087;
+    font-size: .82rem;
+    line-height: 1.45;
+}
+.employeemgmt-list-panel .pagination {
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+/* Employee table keyword search. */
+.employeemgmt-search-form {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    max-width: 760px;
+    flex-wrap: wrap;
+}
+.employeemgmt-search-form input[type="search"] {
+    flex: 1 1 320px;
+    min-width: 220px;
+}
