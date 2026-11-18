@@ -79,6 +79,10 @@ if ($canmanage) {
             'wifedob' => 'wife_dob_stamp',
             'sondob' => 'son_dob_stamp',
             'daughterdob' => 'daughter_dob_stamp',
+            // Added 18 November 2026: edit selectors for the new family dates.
+            'husbanddob' => 'husband_dob_stamp',
+            'daughter2dob' => 'daughter2_dob_stamp',
+            'son2dob' => 'son2_dob_stamp',
         ];
         foreach ($datemap as $formfield => $dbfield) {
             $formdata->{$formfield} = empty($record->{$dbfield}) ? 0 : (int)$record->{$dbfield};
@@ -128,6 +132,10 @@ if ($canmanage) {
                 'wifedob' => ['wife_dob', 'wife_dob_stamp'],
                 'sondob' => ['son_dob', 'son_dob_stamp'],
                 'daughterdob' => ['daughter_dob', 'daughter_dob_stamp'],
+                // Added 18 November 2026: save new family date pairs like existing dates.
+                'husbanddob' => ['husband_dob', 'husband_dob_stamp'],
+                'daughter2dob' => ['daughter2_dob', 'daughter2_dob_stamp'],
+                'son2dob' => ['son2_dob', 'son2_dob_stamp'],
             ];
             foreach ($datemap as $formfield => [$readablefield, $stampfield]) {
                 if (empty($data->{$formfield})) {
@@ -253,6 +261,10 @@ function local_birthdayflyer_import_employee_row(array $row, bool $updateexistin
         'wife_dob' => 'wifedob',
         'son_dob' => 'sondob',
         'daughter_dob' => 'daughterdob',
+        // Added 18 November 2026: CSV date mappings for additional family members.
+        'husband_dob' => 'husbanddob',
+        'daughter2_dob' => 'daughter2dob',
+        'son2_dob' => 'son2dob',
     ];
 
     foreach ($fields as $readable => $csvkey) {
@@ -334,6 +346,8 @@ if ($canmanage) {
                 'date_of_birth' => 'dob', 'date_of_joining' => 'dateofjoining',
                 'marriage_date' => 'marriagedate', 'father_dob' => 'fatherdob', 'mother_dob' => 'motherdob',
                 'wife_dob' => 'wifedob', 'son_dob' => 'sondob', 'daughter_dob' => 'daughterdob',
+                // Added 18 November 2026: canonical CSV headers for new family dates.
+                'husband_dob' => 'husbanddob', 'daughter2_dob' => 'daughter2dob', 'son2_dob' => 'son2dob',
                 // Friendly/legacy aliases remain supported for compatibility.
                 'employee_id' => 'empid', 'employeeid' => 'empid', 'emp_id' => 'empid', 'id' => 'empid',
                 'employee_name' => 'empfullname', 'employee_full_name' => 'empfullname', 'full_name' => 'empfullname', 'fullname' => 'empfullname', 'name' => 'empfullname',
@@ -346,6 +360,9 @@ if ($canmanage) {
                 'wife_date_of_birth' => 'wifedob', 'wifedob' => 'wifedob',
                 'son_date_of_birth' => 'sondob', 'sondob' => 'sondob',
                 'daughter_date_of_birth' => 'daughterdob', 'daughterdob' => 'daughterdob',
+                'husband_date_of_birth' => 'husbanddob', 'husbanddob' => 'husbanddob',
+                'second_daughter_dob' => 'daughter2dob', 'daughter_2_dob' => 'daughter2dob', 'daughter2dob' => 'daughter2dob',
+                'second_son_dob' => 'son2dob', 'son_2_dob' => 'son2dob', 'son2dob' => 'son2dob',
             ];
             $mapped = [];
             foreach ($headers as $index => $header) {
@@ -414,7 +431,7 @@ if ($search !== '') {
     $searchfields = [
         'empid', 'empfullname', 'empemail',
         'date_of_birth', 'date_of_joining', 'marriage_date',
-        'father_dob', 'mother_dob', 'wife_dob', 'son_dob', 'daughter_dob',
+        'father_dob', 'mother_dob', 'wife_dob', 'son_dob', 'daughter_dob', 'husband_dob', 'daughter2_dob', 'son2_dob',
     ];
     $searchparts = [];
     $searchparams = [];

@@ -23,6 +23,13 @@
         <FIELD NAME="son_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
         <FIELD NAME="daughter_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
         <FIELD NAME="daughter_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <!-- Added 18 November 2026: additional family birthday date pairs. -->
+        <FIELD NAME="husband_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="husband_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="daughter2_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="daughter2_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="son2_dob" TYPE="char" LENGTH="30" NOTNULL="false"/>
+        <FIELD NAME="son2_dob_stamp" TYPE="int" LENGTH="10" NOTNULL="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>

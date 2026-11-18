@@ -44,6 +44,10 @@ class employee_form extends \moodleform {
             'wifedob' => 'wifedob',
             'sondob' => 'sondob',
             'daughterdob' => 'daughterdob',
+            // Added 18 November 2026: additional family birthday date selectors.
+            'husbanddob' => 'husbanddob',
+            'daughter2dob' => 'daughter2dob',
+            'son2dob' => 'son2dob',
         ] as $field => $stringkey) {
             $mform->addElement('date_selector', $field, get_string($stringkey, 'local_birthdayflyer'), ['optional' => true]);
         }

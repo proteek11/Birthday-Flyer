@@ -287,3 +287,17 @@ $string['enableemailcc'] = 'Enable CC';
 $string['enableemailcc_desc'] = 'When enabled, the configured CC address receives a copy of each email sent by the daily scheduled task.';
 $string['emailccaddress'] = 'CC email address';
 $string['emailccaddress_desc'] = 'Enter one valid email address to receive copies of Thought of the Day, birthday, work anniversary, and marriage anniversary emails.';
+
+// Added 18 November 2026: labels for additional family date fields and events.
+$string['husbanddob'] = "Husband's date of birth";
+$string['daughter2dob'] = "Second daughter's date of birth";
+$string['son2dob'] = "Second son's date of birth";
+$string['birthdaypersonhusband'] = "Husband";
+$string['relationshiphusband'] = "Husband";
+$string['birthdaypersondaughter2'] = "Second daughter";
+$string['relationshipdaughter2'] = "Second daughter";
+$string['birthdaypersonson2'] = "Second son";
+$string['relationshipson2'] = "Second son";
+$string['reportbirthdayhusband'] = "Husband birthday";
+$string['reportbirthdaydaughter2'] = "Second daughter birthday";
+$string['reportbirthdayson2'] = "Second son birthday";

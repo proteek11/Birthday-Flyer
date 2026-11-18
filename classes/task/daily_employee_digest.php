@@ -49,12 +49,45 @@ class daily_employee_digest extends \core\task\scheduled_task {
                 'wife_dob_stamp' => ['person' => get_string('birthdaypersonwife', 'local_birthdayflyer'), 'relationship' => get_string('relationshipwife', 'local_birthdayflyer')],
                 'son_dob_stamp' => ['person' => get_string('birthdaypersonson', 'local_birthdayflyer'), 'relationship' => get_string('relationshipson', 'local_birthdayflyer')],
                 'daughter_dob_stamp' => ['person' => get_string('birthdaypersondaughter', 'local_birthdayflyer'), 'relationship' => get_string('relationshipdaughter', 'local_birthdayflyer')],
+                // Added 18 November 2026: additional family birthdays use the existing family-birthday control.
+                'husband_dob_stamp' => ['person' => get_string('birthdaypersonhusband', 'local_birthdayflyer'), 'relationship' => get_string('relationshiphusband', 'local_birthdayflyer')],
+                'daughter2_dob_stamp' => ['person' => get_string('birthdaypersondaughter2', 'local_birthdayflyer'), 'relationship' => get_string('relationshipdaughter2', 'local_birthdayflyer')],
+                'son2_dob_stamp' => ['person' => get_string('birthdaypersonson2', 'local_birthdayflyer'), 'relationship' => get_string('relationshipson2', 'local_birthdayflyer')],
             ];
             $birthdays = [];
             foreach ($birthdaymap as $field => $details) {
                 if (empty($employee->{$field})) { continue; }
                 $bd = usergetdate((int)$employee->{$field}, $timezone);
-                if ((int)$bd['mon'] === (int)$today['mon'] && (int)$bd['mday'] === (int)$today['mday']) { $birthdays[] = $details; }
+                if ((int)$bd['mon'] !== (int)$today['mon'] || (int)$bd['mday'] !== (int)$today['mday']) {
+                    continue;
+                }
+
+                // Added 18 November 2026: avoid duplicate family labels when the
+                // first and second child of the same relationship share a birthday.
+                // In that case, keep the standard "Son" or "Daughter" label only.
+                $primaryfield = null;
+                if ($field === 'daughter2_dob_stamp') {
+                    $primaryfield = 'daughter_dob_stamp';
+                } else if ($field === 'son2_dob_stamp') {
+                    $primaryfield = 'son_dob_stamp';
+                }
+
+                // Added 18 November 2026: use the standard Son/Daughter label
+                // for second-child birthdays too, even when the first child has
+                // a different birthday or no birthday date is recorded.
+                if ($primaryfield && isset($birthdaymap[$primaryfield])) {
+                    $details = $birthdaymap[$primaryfield];
+                }
+
+                if ($primaryfield && !empty($employee->{$primaryfield})) {
+                    $primarydate = usergetdate((int)$employee->{$primaryfield}, $timezone);
+                    if ((int)$primarydate['mon'] === (int)$today['mon'] &&
+                            (int)$primarydate['mday'] === (int)$today['mday']) {
+                        continue;
+                    }
+                }
+
+                $birthdays[] = $details;
             }
             $workyears = 0;
             if (!empty($employee->date_of_joining_stamp)) {

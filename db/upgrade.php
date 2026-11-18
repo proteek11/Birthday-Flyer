@@ -263,5 +263,24 @@ function xmldb_local_birthdayflyer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102603, 'local', 'birthdayflyer');
     }
 
+
+    if ($oldversion < 2026111800) {
+        // Added 18 November 2026: add husband and second-child birthday dates.
+        // Both the readable date and timestamp are nullable, matching existing
+        // family date fields. Existing employee data is not modified.
+        $table = new xmldb_table('local_birthdayflyer');
+        foreach (['husband_dob', 'daughter2_dob', 'son2_dob'] as $datefield) {
+            $readable = new xmldb_field($datefield, XMLDB_TYPE_CHAR, '30', null, null, null, null);
+            $timestamp = new xmldb_field($datefield . '_stamp', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            if (!$dbman->field_exists($table, $readable)) {
+                $dbman->add_field($table, $readable);
+            }
+            if (!$dbman->field_exists($table, $timestamp)) {
+                $dbman->add_field($table, $timestamp);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026111800, 'local', 'birthdayflyer');
+    }
+
     return true;
 }

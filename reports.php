@@ -39,6 +39,10 @@ $eventmap = [
     'wife_dob_stamp' => 'reportbirthdaywife',
     'son_dob_stamp' => 'reportbirthdayson',
     'daughter_dob_stamp' => 'reportbirthdaydaughter',
+    // Added 18 November 2026: include additional family birthdays in reports.
+    'husband_dob_stamp' => 'reportbirthdayhusband',
+    'daughter2_dob_stamp' => 'reportbirthdaydaughter2',
+    'son2_dob_stamp' => 'reportbirthdayson2',
 ];
 $events = [];
 foreach ($employees as $employee) {
