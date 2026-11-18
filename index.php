@@ -504,7 +504,7 @@ if ($canmanage) {
     echo html_writer::start_div('employeemgmt-panel-heading');
     echo html_writer::tag('div', html_writer::tag('h3', get_string('importemployees', 'local_birthdayflyer')) .
         html_writer::tag('p', get_string('employeecsvintro', 'local_birthdayflyer')) .
-        html_writer::link(new moodle_url('/local/birthdayflyer/sample_employee_import.csv'), get_string('downloademployeecsvsample', 'local_birthdayflyer'), ['class' => 'employeemgmt-csv-sample-link']), ['class' => 'employeemgmt-heading-copy']);
+        html_writer::link(new moodle_url('/local/birthdayflyer/sample_employee_import.csv', ['v' => 2026111803]), get_string('downloademployeecsvsample', 'local_birthdayflyer'), ['class' => 'employeemgmt-csv-sample-link']), ['class' => 'employeemgmt-heading-copy']);
     echo html_writer::end_div();
     $employeecsvform->display();
     echo html_writer::end_div();
