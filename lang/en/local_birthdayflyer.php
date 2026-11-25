@@ -199,7 +199,7 @@ $string['templatetext'] = 'HTML email body (paste raw HTML)';
 $string['templateimage'] = 'Upload image / birthday banner';
 $string['templateactive'] = 'Active template';
 $string['savetemplate'] = 'Save template';
-$string['templatevariables'] = 'Supported placeholders: {{username}}, {{user fullname}}, {{user_fullname}}, {{employee_fullname}}, {{employeeid}}, {{employeeemail}}, {{date}}, {{thought_of_the_day}}, {{birthday_person}}, {{relationship}}, {{work_anniversary_years}}, {{marriage_anniversary_years}}, {{years}}, and {{image}}. The uploaded image is inserted where {{image}} appears; if omitted, it is added at the top of the email.';
+$string['templatevariables'] = 'Supported placeholders: {{username}}, {{user fullname}}, {{user_fullname}}, {{employee_fullname}}, {{employeeid}}, {{employeeemail}}, {{date}}, {{thought_of_the_day}}, {{birthday_person}}, {{relationship}}, {{work_anniversary_years}}, {{marriage_anniversary_years}}, {{years}}, {{image}} and {{image_url}}. The uploaded image is inserted where {{image}} appears; if neither {{image}} nor {{image_url}} is used, it is added at the top of the email. {{image_url}} gives only the image address, for a background, e.g. &lt;td background="{{image_url}}" style="background-image:url(\'{{image_url}}\')"&gt;. See README.md for an Outlook-safe background example.';
 $string['templatesaved'] = 'Birthday email template saved.';
 $string['templatedeleted'] = 'Birthday email template deleted.';
 $string['confirmdeletetemplate'] = 'Are you sure you want to delete the template "{$a}"?';
@@ -282,11 +282,11 @@ $string['employeesearchplaceholder'] = 'Search employees by ID, name, email, or 
 $string['clearsearch'] = 'Clear search';
 // Added 16 November 2026: optional global CC settings for scheduled emails.
 $string['ccsettingsheading'] = 'Email CC settings';
-$string['ccsettingsintro'] = 'Optionally send a copy of every Birthday Flyer email to one additional email address. The employee remains the primary recipient.';
+$string['ccsettingsintro'] = 'Optionally send a copy of Birthday Flyer emails to one or more additional email addresses. The employee remains the primary recipient. Choose below which email types are copied.';
 $string['enableemailcc'] = 'Enable CC';
-$string['enableemailcc_desc'] = 'When enabled, the configured CC address receives a copy of each email sent by the daily scheduled task.';
-$string['emailccaddress'] = 'CC email address';
-$string['emailccaddress_desc'] = 'Enter one valid email address to receive copies of Thought of the Day, birthday, work anniversary, and marriage anniversary emails.';
+$string['enableemailcc_desc'] = 'When enabled, the configured CC addresses receive a copy of each email type ticked below.';
+$string['emailccaddress'] = 'CC email addresses';
+$string['emailccaddress_desc'] = 'One or more email addresses, separated by commas, semicolons or new lines (maximum 10). External addresses such as Gmail are allowed. If an employee is skipped (for example a suspended account), no copy is sent for that employee either.';
 
 // Added 18 November 2026: labels for additional family date fields and events.
 $string['husbanddob'] = "Husband's date of birth";
@@ -301,3 +301,77 @@ $string['relationshipson2'] = "Second son";
 $string['reportbirthdayhusband'] = "Husband birthday";
 $string['reportbirthdaydaughter2'] = "Second daughter birthday";
 $string['reportbirthdayson2'] = "Second son birthday";
+
+// v1.2.0 (25 November 2026): CC per email type, several CC addresses, delivery log, layout and checks.
+$string['emailccaddressinvalid'] = 'These are not valid email addresses: {$a}';
+$string['emailccaddresstoomany'] = 'Please enter at most {$a} CC addresses.';
+$string['cctype_desc'] = 'Add the CC addresses to this type of email.';
+$string['cctype_thought'] = 'CC Thought of the Day';
+$string['cctype_birthdayemployee'] = 'CC employee birthday emails';
+$string['cctype_birthdayrelationship'] = 'CC family birthday emails';
+$string['cctype_workanniversary'] = 'CC work anniversary emails';
+$string['cctype_marriageanniversary'] = 'CC marriage anniversary emails';
+$string['deliveryheading'] = 'Delivery and layout';
+$string['deliveryheading_desc'] = 'Optional settings. The defaults keep the original behaviour.';
+$string['thoughtlayout'] = 'Thought of the Day layout';
+$string['thoughtlayout_desc'] = 'Original overlay: the quote is placed over the artwork with CSS positioning; Gmail and Outlook remove that positioning, so there the quote appears below the picture. Email-safe: a 600px table with the artwork as background (plus an Outlook fallback), so the quote stays on the artwork in Gmail and Outlook too. The email-safe layout loads the artwork from this site, so the site must be reachable from the internet. Send yourself a test with cli/send_test.php before switching.';
+$string['thoughtlayout_overlay'] = 'Original overlay (default)';
+$string['thoughtlayout_emailsafe'] = 'Email-safe background';
+$string['senddelayms'] = 'Pause between emails (milliseconds)';
+$string['senddelayms_desc'] = 'Optional pause after each email, for mail providers that limit how many messages can be sent per minute. 0 = no pause. Example: 500 sends about 120 emails per minute.';
+$string['taskalreadysent'] = 'Email "{$a->type}" for employee {$a->empid} was already sent today; not sending again.';
+$string['taskemailfailedtype'] = 'Email "{$a->type}" for employee {$a->empid} not sent: {$a->reason}';
+$string['taskccinvalid'] = 'Ignoring invalid CC addresses: {$a}';
+$string['reportdeliveryissues'] = 'Delivery issues (last 30 days)';
+$string['reportdeliveryissuesintro'] = 'Emails that were skipped or failed, with the reason. A failed email is retried automatically if the scheduled task runs again on the same day (use "Run now" under Scheduled tasks); emails already sent are never sent twice.';
+$string['reportnodeliveryissues'] = 'No skipped or failed emails in the last 30 days.';
+$string['reportdeliveryissuescount'] = 'Delivery issues (30 days)';
+$string['reportemailtype'] = 'Email type';
+$string['reportreason'] = 'Reason';
+$string['reportstatus_sent'] = 'Sent';
+$string['reportstatus_skipped'] = 'Skipped';
+$string['reportstatus_failed'] = 'Failed';
+$string['messagetype_thought'] = 'Thought of the Day';
+$string['messagetype_birthdayemployee'] = 'Employee birthday';
+$string['messagetype_birthdayrelationship'] = 'Family birthday';
+$string['messagetype_workanniversary'] = 'Work anniversary';
+$string['messagetype_marriageanniversary'] = 'Marriage anniversary';
+$string['messagetype_recipient'] = 'All emails';
+$string['reason_invalidemail'] = 'The employee email address is empty or invalid.';
+$string['reason_suspended'] = 'The matching Moodle account is suspended.';
+$string['reason_deleted'] = 'The matching Moodle account is deleted.';
+$string['reason_nologin'] = 'The matching Moodle account uses the "No login" authentication method.';
+$string['reason_bounce'] = 'The address is over Moodle\'s email bounce limit.';
+$string['reason_notallowed'] = 'The address is blocked by Moodle\'s allowed/denied email domain settings.';
+$string['reason_noemailever'] = 'Not sent: email is disabled on this site ($CFG->noemailever).';
+$string['reason_mailerror'] = 'Mail server error: {$a}';
+$string['templatewarnbackgrounddata'] = 'This template uses an inline data: image as a background. Gmail and Outlook do not show those. Upload the image and use {{image_url}} instead.';
+$string['templatewarnbackgroundcid'] = 'This template uses a cid: image as a background. Gmail does not show those. Use {{image_url}} instead.';
+$string['templatewarndraftfile'] = 'This template links to a draft file (draftfile.php). Draft files are temporary and need a login, so the image will disappear. Upload the image with the template image field and use {{image}} or {{image_url}}.';
+$string['templatewarnpluginfile'] = 'This template links to an image through pluginfile.php, which usually needs a Moodle login. Recipients reading email outside Moodle may not see it. Prefer the template image field with {{image}} or {{image_url}}.';
+$string['templatewarnlocalhost'] = 'This template links to localhost / 127.0.0.1. Recipients cannot load images from that address.';
+$string['privacy:metadata:local_birthdayflyer_log'] = 'Per-email delivery log of the daily scheduled task.';
+$string['privacy:metadata:local_birthdayflyer_log:employeeid'] = 'The employee record the email was for.';
+$string['privacy:metadata:local_birthdayflyer_log:senddate'] = 'The day the email was processed.';
+$string['privacy:metadata:local_birthdayflyer_log:messagetype'] = 'The type of email.';
+$string['privacy:metadata:local_birthdayflyer_log:status'] = 'Whether the email was sent, skipped or failed.';
+$string['privacy:metadata:local_birthdayflyer_log:reason'] = 'Why the email was skipped or failed.';
+$string['privacy:metadata:local_birthdayflyer_log:ccaddresses'] = 'The CC addresses the email was copied to.';
+$string['privacy:metadata:local_birthdayflyer:husband_dob'] = 'Husband date of birth.';
+$string['privacy:metadata:local_birthdayflyer:daughter2_dob'] = 'Second daughter date of birth.';
+$string['privacy:metadata:local_birthdayflyer:son2_dob'] = 'Second son date of birth.';
+$string['clisendtest_help'] = 'Send one employee\'s Birthday Flyer emails to a test address. Nothing is logged, so the real morning email is not affected.
+
+Options:
+--empid=ID        Employee ID (as uploaded), required.
+--to=EMAIL        Address that receives the test emails, required.
+--date=YYYY-MM-DD Day to simulate (default: today, server time).
+--withcc          Also copy the configured CC addresses (per-type CC switches apply).
+-h, --help        Show this help.
+
+Example:
+php local/birthdayflyer/cli/send_test.php --empid=E1001 --to=me@example.com --date=2026-12-01
+';
+$string['taskccrejected'] = 'Email "{$a->type}" for employee {$a->empid} was sent, but the mail server refused a CC address: {$a->reason}';
+$string['reportstatus_ccrejected'] = 'Sent, CC refused';
+$string['reason_ccrejected'] = 'The employee received the email, but the mail server refused the CC address (often a relay that does not allow external recipients): {$a}';

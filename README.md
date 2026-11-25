@@ -91,3 +91,74 @@ Dashboard and navigation update (0.2.1)
 - Added shared responsive styling for the navigation, subpage headers, thought schedule, and template list. Colors inherit from Moodle/Bootstrap theme variables.
 - Added comments around key navigation, query, and template-action logic and kept user-facing labels in the language pack.
 - Plugin version: 2026101501 (release 0.2.1).
+
+
+Version 1.2.0 (25 November 2026) - CC, images, delivery log
+-----------------------------------------------------------
+Why: CC copies were sometimes missing, background images were sometimes missing
+in some mailboxes, and a failed email could not be retried without duplicates.
+Full list in CHANGELOG.md; every changed line in the code is marked "v1.2.0".
+
+What changes for administrators
+- CC per email type (Site administration > Plugins > Local plugins > Birthday Flyer):
+  "CC Thought of the Day" is OFF after the upgrade (it used to put one copy per
+  employee in the CC mailbox every morning). Birthday and anniversary CC stay ON.
+- Several CC addresses: separate them with commas, semicolons or new lines (max 10).
+  An invalid address is named in an error instead of silently clearing the setting.
+  External addresses (for example Gmail) are allowed.
+- If the mail server refuses a CC address (typical when the company relay does
+  not allow external recipients) the employee still gets the email; the Reports
+  page shows "Sent, CC refused" with the server's message. Before 1.2.0 this
+  was hidden and the employee was wrongly counted as failed.
+- Reports > "Delivery issues (last 30 days)": every skipped or failed email and why
+  (suspended account, "No login" account, mail server error, CC refused...).
+- A failed email can be retried the same day with Scheduled tasks > Run now.
+  Emails that already went out are never sent twice.
+- Suspended accounts and accounts using the "No login" authentication method are
+  still skipped (unchanged). Employees who never logged in still get their email.
+- Emails are DKIM-signed when DKIM is configured in Moodle (Outgoing mail > DKIM selector),
+  like every other Moodle email.
+
+Background images in templates
+- {{image}} inserts the uploaded template image as a picture (embedded in the email).
+- NEW {{image_url}} gives only the public address of the uploaded image, for use as a
+  background. Backgrounds stay a public link on purpose: Gmail does not show embedded
+  (cid:) or data: images as backgrounds. The site must be reachable from the internet.
+- Outlook-safe background example (600px wide, 400px high artwork):
+
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr>
+  <td width="600" height="400" valign="top" background="{{image_url}}"
+      style="background-image:url('{{image_url}}');background-size:600px 400px;background-repeat:no-repeat;">
+  <!--[if gte mso 9]><v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:450pt;height:300pt;">
+  <v:fill type="frame" src="{{image_url}}" /><v:textbox inset="0,0,0,0"><![endif]-->
+      <p style="margin:120px 24px 0;font-family:Arial;font-size:22px;">Happy birthday, {{employee_fullname}}!</p>
+  <!--[if gte mso 9]></v:textbox></v:rect><![endif]-->
+  </td></tr></table>
+
+- When a template is saved, the page warns about image references that mail clients
+  cannot show (data: backgrounds, draftfile.php / pluginfile.php links, localhost).
+  Saving is never blocked.
+- Images pasted into the HTML as data:image/... are now embedded as real attachments
+  (Gmail blocks data: images).
+
+Thought of the Day layout
+- "Original overlay" (default, unchanged) or "Email-safe background" (600px table with
+  the artwork as background, plus an Outlook fallback). In Gmail/Outlook the original
+  layout shows the quote below the picture; the email-safe layout keeps it on the
+  artwork. Test with the CLI script below before switching.
+
+Test emails without affecting the morning run
+  php local/birthdayflyer/cli/send_test.php --empid=E1001 --to=you@example.com [--date=2026-12-01] [--withcc]
+Builds the exact emails the task would send for that employee and day and sends them
+only to --to (subject prefixed [TEST]). Nothing is logged.
+
+Optional delivery settings
+- "Pause between emails (milliseconds)", default 0 (no pause).
+- To reuse one SMTP connection for many emails, raise Moodle's
+  Outgoing mail > "SMTP session limit" (smtpmaxbulk), e.g. to 50. Default 1 keeps the old behaviour.
+
+Upgrade notes
+- New table local_birthdayflyer_log; existing tables and data are untouched.
+- The upgrade writes the new settings with the defaults above; existing values are kept.
+- The order of two old upgrade steps was corrected (only matters when upgrading from a
+  2026101600-or-older copy).

@@ -146,13 +146,12 @@ function xmldb_local_birthdayflyer_upgrade($oldversion) {
     }
 
 
-    if ($oldversion < 2026101602) {
-        // Allow the dated Thought of the Day field to contain raw HTML,
-        // matching the raw-HTML editing behavior used by Birthday Wishes.
-        // No database schema change is required.
-        upgrade_plugin_savepoint(true, 2026101602, 'local', 'birthdayflyer');
-    }
-
+    // v1.2.0 (25 November 2026): the 2026101601 step below used to come AFTER the
+    // 2026101602 step. upgrade_plugin_savepoint() refuses to move the version
+    // backwards, so a site upgrading from 2026101600 or older stopped with a
+    // "downgrade" error. The two blocks are now in version order. Sites that are
+    // already past 2026101602 (such as the live site) skip both blocks, so this
+    // reordering changes nothing for them.
     if ($oldversion < 2026101601) {
         // Store a secure public image key for each Thought of the Day image.
         $table = new xmldb_table('local_birthdayflyer_thought');
@@ -165,6 +164,13 @@ function xmldb_local_birthdayflyer_upgrade($oldversion) {
             }
         }
         upgrade_plugin_savepoint(true, 2026101601, 'local', 'birthdayflyer');
+    }
+
+    if ($oldversion < 2026101602) {
+        // Allow the dated Thought of the Day field to contain raw HTML,
+        // matching the raw-HTML editing behavior used by Birthday Wishes.
+        // No database schema change is required.
+        upgrade_plugin_savepoint(true, 2026101602, 'local', 'birthdayflyer');
     }
 
     if ($oldversion < 2026101604) {
@@ -280,6 +286,54 @@ function xmldb_local_birthdayflyer_upgrade($oldversion) {
             }
         }
         upgrade_plugin_savepoint(true, 2026111800, 'local', 'birthdayflyer');
+    }
+
+    if ($oldversion < 2026112600) {
+        // v1.2.0 (25 November 2026): per-email delivery log.
+        // Why: the day-level local_birthdayflyer_sent row is only written when every
+        // email for an employee succeeded, so a partial failure could not be retried
+        // without re-sending the emails that had already gone out, and the reason
+        // for a failure was only visible in debug output. Existing tables and data
+        // are not touched.
+        $table = new xmldb_table('local_birthdayflyer_log');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('employeeid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('senddate', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('messagetype', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('reason', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('ccaddresses', XMLDB_TYPE_CHAR, '1333', null, null, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('employee_fk', XMLDB_KEY_FOREIGN, ['employeeid'], 'local_birthdayflyer', ['id']);
+        $table->add_index('employee_date_type_uix', XMLDB_INDEX_UNIQUE, ['employeeid', 'senddate', 'messagetype']);
+        $table->add_index('senddate_status_ix', XMLDB_INDEX_NOTUNIQUE, ['senddate', 'status']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // v1.2.0: CC per email type. Written explicitly so the behaviour is defined the
+        // moment the upgrade finishes, before anyone opens the settings page.
+        // Agreed: Thought of the Day is no longer CC'd (it produced one CC copy per
+        // employee every morning); birthdays and anniversaries keep their CC.
+        // Values that already exist are never overwritten.
+        $defaults = [
+            'cc_thought' => 0,
+            'cc_birthdayemployee' => 1,
+            'cc_birthdayrelationship' => 1,
+            'cc_workanniversary' => 1,
+            'cc_marriageanniversary' => 1,
+            'thought_layout' => 'overlay',
+            'send_delay_ms' => 0,
+        ];
+        foreach ($defaults as $name => $value) {
+            if (get_config('local_birthdayflyer', $name) === false) {
+                set_config($name, $value, 'local_birthdayflyer');
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026112600, 'local', 'birthdayflyer');
     }
 
     return true;

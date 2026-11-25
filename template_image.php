@@ -1,4 +1,9 @@
 <?php
+// v1.2.0 (25 November 2026): these images are opened by mail clients and image
+// proxies (e.g. Gmail), never by a logged-in browser session. NO_MOODLE_COOKIES
+// stops Moodle starting a session for every image request. Access is still
+// protected by the secret key checked below.
+define('NO_MOODLE_COOKIES', true);
 require('../../config.php');
 $id = required_param('id', PARAM_INT);
 $key = required_param('key', PARAM_ALPHANUMEXT);

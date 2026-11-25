@@ -28,6 +28,17 @@ $deliverypagesize = 10;
 $deliveryparams = ['cutoff' => $recentcutoff, 'today' => $todaykey];
 $recentdeliverytotal = $DB->count_records_select('local_birthdayflyer_sent', 'senddate >= :cutoff AND senddate <= :today', $deliveryparams);
 $recentdelivery = $DB->get_records_select('local_birthdayflyer_sent', 'senddate >= :cutoff AND senddate <= :today', $deliveryparams, 'senddate DESC, id DESC', '*', $deliverypage * $deliverypagesize, $deliverypagesize);
+// v1.2.0 (25 November 2026): skipped/failed emails from the per-email log, with the reason.
+// Before this, a failure was only visible as "failed" in the cron output.
+// Also listed: emails that reached the employee but whose CC was refused by the mail server.
+$issueselect = 'senddate >= :cutoff AND senddate <= :today AND (status <> :sent OR ' .
+    $DB->sql_like('reason', ':ccrejected') . ')';
+$issueparams = $deliveryparams + ['sent' => 'sent', 'ccrejected' => 'ccrejected:%'];
+$issuetotal = $DB->count_records_select('local_birthdayflyer_log', $issueselect, $issueparams);
+$issuepage = max(0, optional_param('issuepage', 0, PARAM_INT));
+$issuepagesize = 20;
+$issues = $DB->get_records_select('local_birthdayflyer_log', $issueselect, $issueparams,
+    'senddate DESC, timemodified DESC, id DESC', '*', $issuepage * $issuepagesize, $issuepagesize);
 
 $activecount = 0;
 foreach ($templates as $template) { if (!empty($template->active)) { $activecount++; } }
@@ -99,6 +110,7 @@ foreach ([
     [count($thoughts), 'reportthoughts'],
     [$activecount, 'reportactivetemplates'],
     [$recentdeliverytotal, 'reportdelivery30days'],
+    [$issuetotal, 'reportdeliveryissuescount'], // v1.2.0.
 ] as [$value, $label]) {
     echo html_writer::start_div('employeemgmt-report-card');
     echo html_writer::tag('div', (string)$value, ['class' => 'employeemgmt-report-card-value']);
@@ -143,6 +155,50 @@ if (!$recentdelivery) {
     echo html_writer::table($table);
     echo $OUTPUT->paging_bar($recentdeliverytotal, $deliverypage, $deliverypagesize,
         new moodle_url('/local/birthdayflyer/reports.php'), 'deliverypage');
+}
+echo html_writer::end_div();
+
+// v1.2.0 (25 November 2026): delivery issues panel.
+echo html_writer::start_div('employeemgmt-panel employeemgmt-list-panel');
+echo html_writer::start_div('employeemgmt-panel-heading');
+echo html_writer::tag('div', html_writer::tag('h3', get_string('reportdeliveryissues', 'local_birthdayflyer')) . html_writer::tag('p', get_string('reportdeliveryissuesintro', 'local_birthdayflyer')), ['class' => 'employeemgmt-heading-copy']);
+echo html_writer::end_div();
+if (!$issues) {
+    echo $OUTPUT->notification(get_string('reportnodeliveryissues', 'local_birthdayflyer'), 'info');
+} else {
+    $sm = get_string_manager();
+    $table = new html_table();
+    $table->attributes['class'] = 'generaltable employeemgmt-table employeemgmt-report-table';
+    $table->head = [get_string('reportdeliverydate', 'local_birthdayflyer'), get_string('reportemployee', 'local_birthdayflyer'),
+        get_string('reportemailtype', 'local_birthdayflyer'), get_string('reportstatus', 'local_birthdayflyer'), get_string('reportreason', 'local_birthdayflyer')];
+    foreach ($issues as $issue) {
+        $employee = $employeeById[(int)$issue->employeeid] ?? null;
+        $typekey = 'messagetype_' . $issue->messagetype;
+        $statuskey = 'reportstatus_' . $issue->status;
+        // Reason codes are stored, not sentences, so the report can be translated.
+        // "mailerror: <server text>" keeps the mail server's own message.
+        $reason = (string)$issue->reason;
+        if (strpos($reason, 'ccrejected:') === 0) {
+            $statuskey = 'reportstatus_ccrejected';
+            $reasontext = get_string('reason_ccrejected', 'local_birthdayflyer', trim(substr($reason, strlen('ccrejected:'))));
+        } else if (strpos($reason, 'mailerror:') === 0) {
+            $reasontext = get_string('reason_mailerror', 'local_birthdayflyer', trim(substr($reason, strlen('mailerror:'))));
+        } else if ($reason !== '' && $sm->string_exists('reason_' . $reason, 'local_birthdayflyer')) {
+            $reasontext = get_string('reason_' . $reason, 'local_birthdayflyer');
+        } else {
+            $reasontext = $reason !== '' ? $reason : '—';
+        }
+        $table->data[] = [
+            userdate((int)$issue->senddate, get_string('strftimedate')),
+            $employee ? s($employee->empfullname) . ' <span class="report-muted">(' . s($employee->empid) . ')</span>' : '—',
+            s($sm->string_exists($typekey, 'local_birthdayflyer') ? get_string($typekey, 'local_birthdayflyer') : $issue->messagetype),
+            s($sm->string_exists($statuskey, 'local_birthdayflyer') ? get_string($statuskey, 'local_birthdayflyer') : $issue->status),
+            s($reasontext),
+        ];
+    }
+    echo html_writer::table($table);
+    echo $OUTPUT->paging_bar($issuetotal, $issuepage, $issuepagesize,
+        new moodle_url('/local/birthdayflyer/reports.php'), 'issuepage');
 }
 echo html_writer::end_div();
 

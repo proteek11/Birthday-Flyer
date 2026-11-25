@@ -39,6 +39,10 @@ class provider implements metadata_provider {
                 'son_dob_stamp' => 'privacy:metadata:local_birthdayflyer:son_dob_stamp',
                 'daughter_dob' => 'privacy:metadata:local_birthdayflyer:daughter_dob',
                 'daughter_dob_stamp' => 'privacy:metadata:local_birthdayflyer:daughter_dob_stamp',
+                // v1.2.0: the 18 November 2026 family dates were missing from the metadata.
+                'husband_dob' => 'privacy:metadata:local_birthdayflyer:husband_dob',
+                'daughter2_dob' => 'privacy:metadata:local_birthdayflyer:daughter2_dob',
+                'son2_dob' => 'privacy:metadata:local_birthdayflyer:son2_dob',
                 'usermodified' => 'privacy:metadata:local_birthdayflyer:usermodified',
             ],
             'privacy:metadata:local_birthdayflyer'
@@ -69,6 +73,19 @@ class provider implements metadata_provider {
                 'senddate' => 'privacy:metadata:local_birthdayflyer_sent:senddate',
             ],
             'privacy:metadata:local_birthdayflyer_sent'
+        );
+        // v1.2.0 (25 November 2026): per-email delivery log.
+        $collection->add_database_table(
+            'local_birthdayflyer_log',
+            [
+                'employeeid' => 'privacy:metadata:local_birthdayflyer_log:employeeid',
+                'senddate' => 'privacy:metadata:local_birthdayflyer_log:senddate',
+                'messagetype' => 'privacy:metadata:local_birthdayflyer_log:messagetype',
+                'status' => 'privacy:metadata:local_birthdayflyer_log:status',
+                'reason' => 'privacy:metadata:local_birthdayflyer_log:reason',
+                'ccaddresses' => 'privacy:metadata:local_birthdayflyer_log:ccaddresses',
+            ],
+            'privacy:metadata:local_birthdayflyer_log'
         );
         return $collection;
     }

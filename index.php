@@ -45,6 +45,8 @@ if ($deleteid) {
     if ($confirmdelete) {
         require_sesskey();
         $DB->delete_records('local_birthdayflyer_sent', ['employeeid' => $deleterecord->id]);
+        // v1.2.0 (25 November 2026): also remove the employee's per-email delivery log rows.
+        $DB->delete_records('local_birthdayflyer_log', ['employeeid' => $deleterecord->id]);
         $DB->delete_records('local_birthdayflyer', ['id' => $deleterecord->id]);
         redirect(new moodle_url('/local/birthdayflyer/index.php'), get_string('employeedeleted', 'local_birthdayflyer'), null, \core\output\notification::NOTIFY_SUCCESS);
     }

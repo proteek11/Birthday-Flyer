@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_birthdayflyer';
-$plugin->version = 2026111804;
+$plugin->version = 2026112600; // v1.2.0: per-email log table + CC per type (see CHANGELOG.md).
 $plugin->requires = 2022041900; // Moodle 4.0.
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.1.3';
+$plugin->release = '1.2.0';

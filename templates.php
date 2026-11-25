@@ -130,6 +130,13 @@ if ($form->is_cancelled()) {
             break;
         }
     }
+    // v1.2.0 (25 November 2026): warn (never block) when the template contains image
+    // references that common mail clients cannot show, e.g. a data: image used as a
+    // background or a draftfile.php link. This was the usual reason for "the
+    // background image is missing" in some mailboxes.
+    foreach (\local_birthdayflyer\local\template_checker::check((string)$data->body_html) as $warningkey) {
+        \core\notification::warning(get_string($warningkey, 'local_birthdayflyer'));
+    }
     redirect(new moodle_url('/local/birthdayflyer/templates.php'), get_string('templatesaved', 'local_birthdayflyer'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 

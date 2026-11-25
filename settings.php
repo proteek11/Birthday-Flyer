@@ -84,11 +84,64 @@ if ($hassiteconfig) {
         0
     ));
 
-    $settings->add(new admin_setting_configtext(
+    // v1.2.0 (25 November 2026): the CC address box now accepts several addresses
+    // (comma, semicolon or one per line). Same config name as before, so the
+    // address already saved keeps working. Invalid addresses are named in an
+    // error and nothing is saved, instead of the old silent empty value.
+    $settings->add(new \local_birthdayflyer\admin\setting_emaillist(
         'local_birthdayflyer/email_cc_address',
         get_string('emailccaddress', 'local_birthdayflyer'),
         get_string('emailccaddress_desc', 'local_birthdayflyer'),
         '',
-        PARAM_EMAIL
+        PARAM_RAW_TRIMMED,
+        '60',
+        '3'
+    ));
+
+    // v1.2.0 (25 November 2026): choose which email types carry the CC.
+    // Thought of the Day goes to every employee, so CCing it put one copy per
+    // employee in the CC mailbox every morning and used SMTP quota; it is off by
+    // default. Birthdays and anniversaries stay on (same as before).
+    $cctypes = [
+        'thought' => 0,
+        'birthdayemployee' => 1,
+        'birthdayrelationship' => 1,
+        'workanniversary' => 1,
+        'marriageanniversary' => 1,
+    ];
+    foreach ($cctypes as $cctype => $ccdefault) {
+        $settings->add(new admin_setting_configcheckbox(
+            'local_birthdayflyer/cc_' . $cctype,
+            get_string('cctype_' . $cctype, 'local_birthdayflyer'),
+            get_string('cctype_desc', 'local_birthdayflyer'),
+            $ccdefault
+        ));
+    }
+
+    // v1.2.0 (25 November 2026): delivery and layout options. Defaults keep the
+    // existing behaviour exactly (original overlay layout, no pause).
+    $settings->add(new admin_setting_heading(
+        'local_birthdayflyer/deliveryheading',
+        get_string('deliveryheading', 'local_birthdayflyer'),
+        get_string('deliveryheading_desc', 'local_birthdayflyer')
+    ));
+
+    $settings->add(new admin_setting_configselect(
+        'local_birthdayflyer/thought_layout',
+        get_string('thoughtlayout', 'local_birthdayflyer'),
+        get_string('thoughtlayout_desc', 'local_birthdayflyer'),
+        'overlay',
+        [
+            'overlay' => get_string('thoughtlayout_overlay', 'local_birthdayflyer'),
+            'emailsafe' => get_string('thoughtlayout_emailsafe', 'local_birthdayflyer'),
+        ]
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_birthdayflyer/send_delay_ms',
+        get_string('senddelayms', 'local_birthdayflyer'),
+        get_string('senddelayms_desc', 'local_birthdayflyer'),
+        0,
+        PARAM_INT
     ));
 }
